@@ -1,7 +1,5 @@
+import Header from '@/components/Header'
 import './globals.css'
-import Header from '../components/Header'
-import Sidebar from '@/components/Sidebar'
-import { Providers } from '@/context/providers'
 
 export const metadata = {
   title: 'Create Next App',
@@ -12,17 +10,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <Providers>
-          <>
-            <Sidebar />
-            <div className="md:pl-64 flex flex-col">
-              <Header />
-              <main className="flex-1">
-                {children}
-              </main>
-            </div>
-          </>
-        </Providers>
+        <Header />
+        {children}
       </body>
     </html>
   )
