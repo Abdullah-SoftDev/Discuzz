@@ -1,8 +1,11 @@
 'use client'
+import { FIREBASE_ERRORS } from "@/firebase/error";
 import { auth } from "@/firebase/firebaseConfig";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSignInWithGoogle } from 'react-firebase-hooks/auth';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 export default function page() {
   const [signInWithGoogle, user, loading, error] = useSignInWithGoogle(auth);
   const router = useRouter()
@@ -11,11 +14,21 @@ export default function page() {
   }
   return (
     <>
-      {error && (
-        <div>
-          <p>Error: {error.message}</p>
-        </div>
-      )}
+      {error &&
+        toast.error(FIREBASE_ERRORS[error.message])
+      }
+      <ToastContainer
+        position="bottom-right"
+        autoClose={1000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
       <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
           <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
