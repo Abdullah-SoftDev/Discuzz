@@ -4,12 +4,9 @@ import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { Fragment, useState } from "react";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import Link from "next/link";
-const user = {
-  name: "Chelsea Hagon",
-  email: "chelsea.hagon@example.com",
-  imageUrl:
-    "https://images.unsplash.com/photo-1550525811-e5869dd03032?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-};
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "@/firebase/firebaseConfig";
+import { signOut } from "firebase/auth";
 
 const userNavigation = [
   { name: "Your Profile", href: "#" },
@@ -84,9 +81,9 @@ function classNames(...classes: any[]) {
   return classes.filter(Boolean).join(" ");
 }
 
-const falseuser: boolean = false;
 export default function Header() {
   const [selected, setSelected] = useState(people[3]);
+  const [user] = useAuthState(auth);
   return (
     <>
       <header className="bg-zinc-100 shadow-sm">
@@ -134,7 +131,7 @@ export default function Header() {
 
             {/* Profile and signin button */}
             <div className="flex items-center justify-end">
-              {falseuser ? (
+              {user ? (
                 <>
                   <Listbox value={selected} onChange={setSelected}>
                     {({ open }) => (
@@ -231,7 +228,7 @@ export default function Header() {
                         <span className="sr-only">Open user menu</span>
                         <img
                           className="h-10 w-10 rounded-full"
-                          src={user.imageUrl}
+                          src={user?.photoURL ?? ''}
                           alt=""
                         />
                       </Menu.Button>
@@ -246,21 +243,14 @@ export default function Header() {
                       leaveTo="transform opacity-0 scale-95"
                     >
                       <Menu.Items className="origin-top-right absolute z-10 right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 py-1 focus:outline-none">
-                        {userNavigation.map((item) => (
-                          <Menu.Item key={item.name}>
-                            {({ active }) => (
-                              <a
-                                href={item.href}
-                                className={classNames(
-                                  active ? "bg-gray-100" : "",
-                                  "block py-2 px-4 text-sm text-gray-700"
-                                )}
-                              >
-                                {item.name}
-                              </a>
-                            )}
-                          </Menu.Item>
-                        ))}
+                        <Menu.Item>
+                          <button
+                            type="button"
+                            onClick={() => signOut(auth)}
+                            className="block py-2 px-4 text-sm text-gray-700">
+                            Sign Out
+                          </button>
+                        </Menu.Item>
                       </Menu.Items>
                     </Transition>
                   </Menu>

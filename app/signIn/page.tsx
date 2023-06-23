@@ -1,8 +1,21 @@
+'use client'
+import { auth } from "@/firebase/firebaseConfig";
 import Link from "next/link";
-
+import { useRouter } from "next/navigation";
+import { useSignInWithGoogle } from 'react-firebase-hooks/auth';
 export default function page() {
+  const [signInWithGoogle, user, loading, error] = useSignInWithGoogle(auth);
+  const router = useRouter()
+  if (user) {
+    router.push('/');
+  }
   return (
     <>
+      {error && (
+        <div>
+          <p>Error: {error.message}</p>
+        </div>
+      )}
       <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
           <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
@@ -81,10 +94,11 @@ export default function page() {
 
             <div className="mt-6">
               <button
+                onClick={() => signInWithGoogle()}
                 type="button"
                 className="flex w-full justify-center rounded-md bg-red-500 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
               >
-                Login via Google
+                {loading ? <p>Loading...</p> : "Login via Google"}
               </button>
             </div>
           </form>
