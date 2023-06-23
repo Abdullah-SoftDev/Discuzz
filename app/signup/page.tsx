@@ -1,8 +1,64 @@
+'use client'
+import { FIREBASE_ERRORS } from "@/firebase/error";
+import { auth } from "@/firebase/firebaseConfig";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import { useCreateUserWithEmailAndPassword, useSignInWithEmailAndPassword } from "react-firebase-hooks/auth";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function page() {
+    const router = useRouter()
+    const [createUserWithEmailAndPassword, user, loading, error,] = useCreateUserWithEmailAndPassword(auth);
+    const [signInWithEmailAndPassword] = useSignInWithEmailAndPassword(auth);
+    const [displayedError, setDisplayedError] = useState<string | null>(null);
+    const [loginForm, setLoginForm] = useState({
+        email: "",
+        password: "",
+        confirmPassword: "",
+    });
+    const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = event.target;
+        setLoginForm({ ...loginForm, [name]: value });
+    };
+    const handleSubmitForm = async (e: FormEvent) => {
+        e.preventDefault();
+        if (loginForm.password !== loginForm.confirmPassword) {
+            setDisplayedError("Passwords do not match.");
+            return;
+        }
+        await createUserWithEmailAndPassword(loginForm.email, loginForm.password);
+        await signInWithEmailAndPassword(loginForm.email, loginForm.password);
+    };
+    useEffect(() => {
+        if (error) {
+            setDisplayedError((error as Error)?.message);
+        }
+    }, [error]);
+    if (user) {
+        router.push('/');
+    }
     return (
         <>
+            {displayedError && (
+                <>
+                    {toast.error(FIREBASE_ERRORS[displayedError])}
+                    {setDisplayedError(null)}
+                </>
+            )}
+            <ToastContainer
+                position="bottom-right"
+                autoClose={1000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light"
+            />
             <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-6 lg:px-8">
 
                 <div className="sm:mx-auto sm:w-full sm:max-w-sm">
@@ -13,7 +69,7 @@ export default function page() {
                 </div>
 
                 <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-                    <form className="space-y-6" action="#" method="POST">
+                    <form onSubmit={handleSubmitForm} className="space-y-6">
                         <div>
                             <label
                                 htmlFor="email"
@@ -24,6 +80,8 @@ export default function page() {
                                 <input
                                     id="email"
                                     name="email"
+                                    value={loginForm.email}
+                                    onChange={handleInputChange}
                                     type="email"
                                     autoComplete="email"
                                     required
@@ -43,6 +101,8 @@ export default function page() {
                                 <input
                                     id="password"
                                     name="password"
+                                    value={loginForm.password}
+                                    onChange={handleInputChange}
                                     type="password"
                                     autoComplete="current-password"
                                     required
@@ -61,7 +121,9 @@ export default function page() {
                             <div className="mt-2">
                                 <input
                                     id="password"
-                                    name="password"
+                                    name="confirmPassword"
+                                    value={loginForm.confirmPassword}
+                                    onChange={handleInputChange}
                                     type="password"
                                     autoComplete="current-password"
                                     required
@@ -73,7 +135,7 @@ export default function page() {
                             <button
                                 type="submit"
                                 className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-                                Sign Up
+                               {loading? "Loading...":"Sign Up"}
                             </button>
                         </div>
                     </form>

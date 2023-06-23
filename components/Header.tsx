@@ -84,6 +84,7 @@ function classNames(...classes: any[]) {
 export default function Header() {
   const [selected, setSelected] = useState(people[3]);
   const [user] = useAuthState(auth);
+  console.log("Header", user)
   return (
     <>
       <header className="bg-zinc-100 shadow-sm">
@@ -224,13 +225,14 @@ export default function Header() {
                   </Listbox>
                   <Menu as="div" className="flex-shrink-0 relative sm:ml-5">
                     <div>
-                      <Menu.Button className="bg-white rounded-full flex focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                      <Menu.Button className="rounded-full flex focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                         <span className="sr-only">Open user menu</span>
-                        <img
+                        {user && user?.photoURL && <img
                           className="h-10 w-10 rounded-full"
                           src={user?.photoURL ?? ''}
                           alt=""
-                        />
+                        />}
+                        {user && user?.email && <p>{user?.email}</p>}
                       </Menu.Button>
                     </div>
                     <Transition
