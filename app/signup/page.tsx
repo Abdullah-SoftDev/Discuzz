@@ -1,6 +1,8 @@
 'use client'
 import { FIREBASE_ERRORS } from "@/firebase/error";
-import { auth } from "@/firebase/firebaseConfig";
+import { auth, db } from "@/firebase/firebaseConfig";
+import { User } from "firebase/auth";
+import { addDoc, collection } from "firebase/firestore";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
@@ -39,6 +41,18 @@ export default function page() {
     if (user) {
         router.push('/');
     }
+
+    const createUserDocumentOnEmailauth = async (user: User) => {
+        const docRef = collection(db, "users")
+        await addDoc(docRef, JSON.parse(JSON.stringify(user)));
+      }
+    
+      useEffect(() => {
+        if (user) {
+          createUserDocumentOnEmailauth(user.user)
+        }
+      }, [user])
+
     return (
         <>
             {displayedError && (

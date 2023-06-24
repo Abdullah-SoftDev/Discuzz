@@ -1,6 +1,8 @@
 'use client'
 import { FIREBASE_ERRORS } from "@/firebase/error";
-import { auth } from "@/firebase/firebaseConfig";
+import { auth, db } from "@/firebase/firebaseConfig";
+import { User } from "firebase/auth";
+import { addDoc, collection, doc, setDoc } from "firebase/firestore";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
@@ -29,9 +31,21 @@ export default function page() {
   }
   useEffect(() => {
     if (error || emailError) {
-      setDisplayedError( (error as Error)?.message || (emailError as Error)?.message);
+      setDisplayedError((error as Error)?.message || (emailError as Error)?.message);
     }
   }, [error, emailError]);
+
+
+  const createUserDocumentOnGoogleauth = async (user: User) => {
+    const docRef = doc(db, "users", user?.uid)
+    await setDoc(docRef, JSON.parse(JSON.stringify(user)));
+  }
+
+  useEffect(() => {
+    if (user) {
+      createUserDocumentOnGoogleauth(user.user)
+    }
+  }, [user])
 
   return (
     <>
