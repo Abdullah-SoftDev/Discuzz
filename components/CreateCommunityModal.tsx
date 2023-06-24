@@ -1,7 +1,7 @@
 import { Dialog, Transition, Listbox } from '@headlessui/react';
 import React, { ChangeEvent, FormEvent, Fragment, useState } from 'react'
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid'
-import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
+import { doc, runTransaction, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '@/firebase/firebaseConfig';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { ToastContainer, toast } from 'react-toastify';
@@ -46,19 +46,28 @@ export default function CreateCommunityModal({ open, setOpen }: CreateCommunityM
         // First check name not taken already and then Create the community document in firebase.
         setLoading(true)
         const docRef = doc(db, "communities", communityName);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-            setError(`Sorry, ${communityName} is already taken. Try another.`);
-            setLoading(false)
-            return;
-        } else {
-            await setDoc((docRef), {
-                creatorId: user?.uid,
-                createdAt: serverTimestamp(),
-                numberOfMembers: 1,
-                privacyType: communityType,
-            });
-        }
+        await runTransaction(db, async (transaction) => {
+            const docSnap = await transaction.get(docRef);
+            if (docSnap.exists()) {
+                setError(`Sorry, ${communityName} is already taken. Try another.`);
+                setLoading(false)
+                return;
+            } else {
+                transaction.set((docRef), {
+                    creatorId: user?.uid,
+                    createdAt: serverTimestamp(),
+                    numberOfMembers: 1,
+                    privacyType: communityType,
+                });
+                transaction.set(
+                    doc(db, `users/${user?.uid}/communitySection`, communityName),
+                    {
+                        communityId: communityName,
+                        isModerator: true,
+                    }
+                );
+            }
+        })
         setLoading(false)
         setOpen(false)
         setCommunityName("")
