@@ -1,18 +1,16 @@
+import Testing from "@/components/Testing";
 import { db } from "@/firebase/firebaseConfig";
-import { doc, getDoc } from "firebase/firestore";
+import { Timestamp, doc, getDoc } from "firebase/firestore";
 import { notFound } from "next/navigation";
 
-interface CommunityData {
+export interface CommunityData {
     id: string;
     numberOfMembers: number;
     creatorId: string;
-    privacyType: string,
-    createdAt: {
-        seconds: number;
-        nanoseconds: number;
-    };
+    privacyType: "Public" | "Private" | "Restricted"
+    createdAt?: Timestamp
+    imageUrl?: string
 }
-
 export default async function Page({ params }: { params?: { communityId?: string } }) {
     const docRef = doc(db, `communities/${params?.communityId}`);
     const product = await getDoc(docRef);
@@ -25,13 +23,14 @@ export default async function Page({ params }: { params?: { communityId?: string
         creatorId: data.creatorId,
         privacyType: data.privacyType,
         createdAt: data.createdAt,
+        imageUrl: data.imageUrl,
     };
-
     return (
         <div>
             <p>Slug: {params?.communityId}</p>
             <p>Community name: {result.id}</p>
             <p>Community name: {result.privacyType}</p>
+            <Testing result={result} />
         </div>
     );
 }  

@@ -7,10 +7,12 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/firebase/firebaseConfig";
 import { signOut } from "firebase/auth";
 import CreateCommunityModal from "./CreateCommunityModal";
+import { useCommunityData } from "@/context/useCommunityData";
 
 export default function Header() {
   const [open, setOpen] = useState(false);
   const [user] = useAuthState(auth);
+  const { communityData, setCommunityData, onJoinLeaveCommunity } = useCommunityData();
   return (
     <>
       <header className="bg-zinc-100 shadow-sm">
@@ -86,7 +88,7 @@ export default function Header() {
                         <Menu.Item>
                           <button
                             type="button"
-                            onClick={() => signOut(auth)}
+                            onClick={async () => { await signOut(auth); setCommunityData(null); }}
                             className="block py-2 px-4 text-sm text-gray-700">
                             Sign Out
                           </button>
